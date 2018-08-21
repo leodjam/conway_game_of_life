@@ -5,6 +5,7 @@ var ctx = canvas.getContext('2d');
 var cellUnit = 20;
 var numOfLines = canvas.width /cellUnit;
 var cells = {};
+var state = {};
 render();
 
 function render()
@@ -53,20 +54,36 @@ function killCell(x,y)
     cells[getCellID(x,y)] = 0;
 }
 
-function updateCellStatus(x, y)
+function updateCellState(x, y)
 {
     var activeCells = getActiveNeibourghs(x, y);
 
-    if(activeCells < 2 || activeCells > 3){
+    if(activeCells == 2){
+        return;
+    }
+    else if(activeCells < 2 || activeCells > 3){
         if(isCellActive(x,y)){
-            killCell(x, y);
+            state[getCellID(x,y)] = 0;
         }
     }
     else{
         if(!isCellActive(x,y)){
-            activateCell(x,y);
+            state[getCellID(x,y)] = 1;
         }
     }
+}
+
+function triggerGenerationState()
+{
+    for (let cell in state) {
+        if(state[cell] == 1 ){
+            activateCell(parseInt(cell[0]), parseInt(cell.slice(-1)));
+        }
+        else{
+            killCell(parseInt(cell[0]), parseInt(cell.slice(-1)));
+        }
+    }
+    state = {};
 }
 
 function getActiveNeibourghs(x, y)
@@ -98,26 +115,25 @@ function isCellActive(x, y)
     }
 }
 
-
 function updateNeibourghs(x,y)
 {
     //SIDES
-    updateCellStatus(x + 1 ,y); //left-side
-    updateCellStatus(x - 1 ,y); //right-side
-    updateCellStatus(x ,y - 1); //top-side
-    updateCellStatus(x ,y + 1); //bottom-side
+    updateCellState(x + 1 ,y); //left-side
+    updateCellState(x - 1 ,y); //right-side
+    updateCellState(x ,y - 1); //top-side
+    updateCellState(x ,y + 1); //bottom-side
 
     //DIAGONALS
-    updateCellStatus(x + 1 ,y - 1); //top-left
-    updateCellStatus(x - 1 ,y - 1); //top-right
-    updateCellStatus(x - 1 ,y + 1); //bottom-left
-    updateCellStatus(x + 1 ,y + 1); //bottom-right
+    updateCellState(x + 1 ,y - 1); //top-left
+    updateCellState(x - 1 ,y - 1); //top-right
+    updateCellState(x - 1 ,y + 1); //bottom-left
+    updateCellState(x + 1 ,y + 1); //bottom-right
 }
 
 function updateLiveCellAndAllNeibourghs(x,y)
 {
     updateNeibourghs(x,y);
-    updateCellStatus(x,y);
+    updateCellState(x,y);
 }
 
 function nextGeneration()
@@ -127,6 +143,7 @@ function nextGeneration()
             updateLiveCellAndAllNeibourghs(parseInt(cell[0]), parseInt(cell.slice(-1)));
         }
     }
+    triggerGenerationState();
 }
 
 function createFirstGeneration()
@@ -135,15 +152,9 @@ function createFirstGeneration()
     activateCell(3,4);
     activateCell(3,2);
 
-    nextGeneration();
-
-    //window.setInterval(function(){
-    //}, 100);
-
-
-    ;
-    //killCell(2,3);
-    //checkNeibourghs(2,3);
+    window.setInterval(function(){
+        nextGeneration();
+    }, 200);
 }
 
 function getCellID(x,y)
@@ -153,13 +164,3 @@ function getCellID(x,y)
 
 };
 
-    //For every live cell and for every of its adjacent cells, check how many lives neibourghs has this cells
-    //Finaly check live cell for life or death condition.
-
-    //death conditions
-    //if current cell has < 2 N
-    //if current cell has > 3 N
-
-    //life conditions
-    //if current cell has >= 2 N && cell has <= 3 N
-    //if cell is dead and has 3 N
