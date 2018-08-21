@@ -10,7 +10,6 @@ render();
 
 function render()
 {
-    drawGrid();
     createFirstGeneration();
 }
 
@@ -39,7 +38,7 @@ function fillCell(x, y, color)
     x= x * cellUnit - cellUnit;
     y= y * cellUnit - cellUnit;
     ctx.fillStyle = color;
-    ctx.fillRect(x + 0.5 , y + 0.5 , cellUnit - 1, cellUnit - 1);
+    ctx.fillRect(x , y, cellUnit, cellUnit);
 }
 
 function activateCell(x,y)
@@ -76,11 +75,12 @@ function updateCellState(x, y)
 function triggerGenerationState()
 {
     for (let cell in state) {
+        var cellName = cell.split('-');
         if(state[cell] == 1 ){
-            activateCell(parseInt(cell[0]), parseInt(cell.slice(-1)));
+            activateCell(parseInt(cellName[0]), parseInt(cellName[1]));
         }
         else{
-            killCell(parseInt(cell[0]), parseInt(cell.slice(-1)));
+            killCell(cellName[0], parseInt(cellName[1]));
         }
     }
     state = {};
@@ -140,7 +140,8 @@ function nextGeneration()
 {
     for (let cell in cells) {
         if(cells[cell] == 1 ){
-            updateLiveCellAndAllNeibourghs(parseInt(cell[0]), parseInt(cell.slice(-1)));
+            var cellName = cell.split('-');
+            updateLiveCellAndAllNeibourghs(parseInt(cellName[0]), parseInt(cellName[1]));
         }
     }
     triggerGenerationState();
@@ -148,9 +149,13 @@ function nextGeneration()
 
 function createFirstGeneration()
 {
-    activateCell(3,3);
-    activateCell(3,4);
-    activateCell(3,2);
+
+    activateCell(20,2);
+    activateCell(21,3);
+    activateCell(21,4);
+    activateCell(20,4);
+    activateCell(19,4);
+
 
     window.setInterval(function(){
         nextGeneration();
