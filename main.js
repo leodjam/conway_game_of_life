@@ -2,7 +2,10 @@ window.onload = function(){
 
 var canvas = document.getElementById('my_canvas');
 var ctx = canvas.getContext('2d');
-var cellUnit = 20;
+canvas.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+canvas.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+
+var cellUnit = 3;
 var numOfLines = canvas.width /cellUnit;
 var cells = {};
 var state = {};
@@ -10,7 +13,13 @@ render();
 
 function render()
 {
-    createFirstGeneration();
+    blackBackground();
+    //createFirstGeneration();
+    randomSpawn(45);    
+
+    window.setInterval(function(){
+        nextGeneration();
+    }, 200);
 }
 
 function drawGrid()
@@ -33,6 +42,12 @@ function drawGrid()
     }
 }
 
+function blackBackground()
+{
+    ctx.fillStyle = "black";
+    ctx.fillRect(0 , 0, canvas.width, canvas.height);
+}
+
 function fillCell(x, y, color)
 {
     x= x * cellUnit - cellUnit;
@@ -43,13 +58,13 @@ function fillCell(x, y, color)
 
 function activateCell(x,y)
 {
-    fillCell(x, y, "black");
+    fillCell(x, y, "white");
     cells[getCellID(x,y)] = 1;
 }
 
 function killCell(x,y)
 {
-    fillCell(x, y, "white");
+    fillCell(x, y, "black");
     cells[getCellID(x,y)] = 0;
 }
 
@@ -149,17 +164,31 @@ function nextGeneration()
 
 function createFirstGeneration()
 {
+    /*Blink
+    activateCell(0,0);
+    activateCell(3,2);
+    activateCell(3,3);
+    */
 
+    /*Glider
     activateCell(20,2);
     activateCell(21,3);
     activateCell(21,4);
     activateCell(20,4);
     activateCell(19,4);
+    */
+}
 
+function randomCoordinate()
+{
+    return Math.floor(Math.random() * numOfLines) + 1;
+}
 
-    window.setInterval(function(){
-        nextGeneration();
-    }, 200);
+function randomSpawn(power)
+{
+    for (var i=0; i <  numOfLines * power; i++) {
+        activateCell(randomCoordinate(),randomCoordinate());
+    }
 }
 
 function getCellID(x,y)
