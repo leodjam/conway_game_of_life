@@ -14,8 +14,7 @@ render();
 function render()
 {
     blackBackground();
-    //createFirstGeneration();
-    randomSpawn(45);    
+    randomSpawn(45);   
 
     window.setInterval(function(){
         nextGeneration();
@@ -160,23 +159,6 @@ function nextGeneration()
         }
     }
     triggerGenerationState();
-}
-
-function createFirstGeneration()
-{
-    /*Blink
-    activateCell(0,0);
-    activateCell(3,2);
-    activateCell(3,3);
-    */
-
-    /*Glider
-    activateCell(20,2);
-    activateCell(21,3);
-    activateCell(21,4);
-    activateCell(20,4);
-    activateCell(19,4);
-    */
 }
 
 function randomCoordinate()
