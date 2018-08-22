@@ -20,7 +20,7 @@ render();
 
 function render()
 {
-    setBackgroundColor();
+    applyBackgroundColor();
     randomSpawn(spawn);   
 
     window.setInterval(function(){
@@ -48,7 +48,7 @@ function drawGrid()
     }
 }
 
-function setBackgroundColor()
+function applyBackgroundColor()
 {
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -169,7 +169,7 @@ function updateNeibourghs(x, y)
     updateCellState(x + 1, y + 1); //bottom-right
 }
 
-function updateLiveCellAndAllNeibourghs(x, y)
+function updateCellAndNeibourghs(x, y)
 {
     updateNeibourghs(x, y);
     updateCellState(x, y);
@@ -182,7 +182,7 @@ function nextGeneration()
         if(cells[cell] == 1 )
         {
             var cellName = cell.split('-');
-            updateLiveCellAndAllNeibourghs(parseInt(cellName[0]), parseInt(cellName[1]));
+            updateCellAndNeibourghs(parseInt(cellName[0]), parseInt(cellName[1]));
         }
     }
     triggerGenerationState();
