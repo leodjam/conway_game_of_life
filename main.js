@@ -1,37 +1,44 @@
-window.onload = function(){
-
+window.onload = function()
+{
 var canvas = document.getElementById('my_canvas');
 var ctx = canvas.getContext('2d');
 canvas.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 canvas.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
 
+//Options
 var cellUnit = 3;
-var numOfLines = canvas.width /cellUnit;
+var speed = 200;
+var spawn = 45;
+var cellColors = ['#27fdf5', '#a8f6f8', '#d7fffe', '#f98dc9', '#f765b8'];
+var backgroundColor = '#000000';
+//
+  
+var numOfLines = canvas.width / cellUnit;
 var cells = {};
 var state = {};
 render();
 
 function render()
 {
-    blackBackground();
-    randomSpawn(45);   
+    setBackgroundColor();
+    randomSpawn(spawn);   
 
     window.setInterval(function(){
         nextGeneration();
-    }, 200);
+    }, speed);
 }
 
 function drawGrid()
 {
     var spaceBetweenLines = cellUnit;
 
-    for(var i=0 ; i < numOfLines ; i++)
+    for(var i = 0 ; i < numOfLines ; i++)
     {
         ctx.beginPath();
         ctx.moveTo(0, spaceBetweenLines);
         ctx.lineTo(canvas.width, spaceBetweenLines);
         ctx.stroke();
-            
+
         ctx.beginPath();
         ctx.moveTo(spaceBetweenLines, 0);
         ctx.lineTo(spaceBetweenLines, canvas.height);
@@ -41,59 +48,87 @@ function drawGrid()
     }
 }
 
-function blackBackground()
+function setBackgroundColor()
 {
-    ctx.fillStyle = "black";
-    ctx.fillRect(0 , 0, canvas.width, canvas.height);
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function fillCell(x, y, color)
 {
-    x= x * cellUnit - cellUnit;
-    y= y * cellUnit - cellUnit;
+    x = x * cellUnit - cellUnit;
+    y = y * cellUnit - cellUnit;
     ctx.fillStyle = color;
-    ctx.fillRect(x , y, cellUnit, cellUnit);
+    ctx.fillRect(x, y, cellUnit, cellUnit);
 }
 
-function activateCell(x,y)
+function activateCell(x, y)
 {
-    fillCell(x, y, "white");
-    cells[getCellID(x,y)] = 1;
+    fillCell(x, y, getCellColor());
+    cells[getCellID(x, y)] = 1;
 }
 
-function killCell(x,y)
+function killCell(x, y)
 {
-    fillCell(x, y, "black");
-    cells[getCellID(x,y)] = 0;
+    fillCell(x, y, backgroundColor);
+    cells[getCellID(x, y)] = 0;
+}
+
+function isCellActive(x, y)
+{
+    if(cells.hasOwnProperty(getCellID(x, y))){
+        return cells[getCellID(x, y)];
+    }
+    else{
+        return 0;
+    }
+}
+
+function getCellID(x, y)
+{
+    return x + '-' + y;
+}
+
+function getCellColor()
+{
+    return cellColors[Math.floor(Math.random() * 5)];
 }
 
 function updateCellState(x, y)
 {
     var activeCells = getActiveNeibourghs(x, y);
 
-    if(activeCells == 2){
+    if(activeCells == 2)
+    {
         return;
     }
-    else if(activeCells < 2 || activeCells > 3){
-        if(isCellActive(x,y)){
-            state[getCellID(x,y)] = 0;
+    else if(activeCells < 2 || activeCells > 3)
+    {
+        if(isCellActive(x, y))
+        {
+            state[getCellID(x, y)] = 0;
         }
     }
-    else{
-        if(!isCellActive(x,y)){
-            state[getCellID(x,y)] = 1;
+    else
+    {
+        if(!isCellActive(x, y))
+        {
+            state[getCellID(x, y)] = 1;
         }
     }
 }
 
 function triggerGenerationState()
 {
-    for (let cell in state) {
+    for (let cell in state) 
+    {
         var cellName = cell.split('-');
-        if(state[cell] == 1 ){
+        if(state[cell] == 1 )
+        {
             activateCell(parseInt(cellName[0]), parseInt(cellName[1]));
         }
-        else{
+        else
+        {
             killCell(cellName[0], parseInt(cellName[1]));
         }
     }
@@ -105,55 +140,47 @@ function getActiveNeibourghs(x, y)
     var activeCells = 0;
 
     //SIDES
-    activeCells += isCellActive(x + 1 ,y); //left-side
-    activeCells += isCellActive(x - 1 ,y); //right-side
-    activeCells += isCellActive(x ,y - 1); //top-side
-    activeCells += isCellActive(x ,y + 1); //bottom-side
+    activeCells += isCellActive(x + 1 , y); //left-side
+    activeCells += isCellActive(x - 1 , y); //right-side
+    activeCells += isCellActive(x, y - 1); //top-side
+    activeCells += isCellActive(x, y + 1); //bottom-side
 
     //DIAGONALS
-    activeCells += isCellActive(x + 1 ,y - 1); //top-left
-    activeCells += isCellActive(x - 1 ,y - 1); //top-right
-    activeCells += isCellActive(x - 1 ,y + 1); //bottom-left
-    activeCells += isCellActive(x + 1 ,y + 1); //bottom-right
+    activeCells += isCellActive(x + 1, y - 1); //top-left
+    activeCells += isCellActive(x - 1, y - 1); //top-right
+    activeCells += isCellActive(x - 1, y + 1); //bottom-left
+    activeCells += isCellActive(x + 1, y + 1); //bottom-right
 
     return activeCells;
 }
 
-function isCellActive(x, y)
-{
-    if(cells.hasOwnProperty(getCellID(x,y))){
-        return cells[getCellID(x,y)];
-    }
-    else{
-        return 0;
-    }
-}
-
-function updateNeibourghs(x,y)
+function updateNeibourghs(x, y)
 {
     //SIDES
-    updateCellState(x + 1 ,y); //left-side
-    updateCellState(x - 1 ,y); //right-side
-    updateCellState(x ,y - 1); //top-side
-    updateCellState(x ,y + 1); //bottom-side
+    updateCellState(x + 1, y); //left-side
+    updateCellState(x - 1, y); //right-side
+    updateCellState(x, y - 1); //top-side
+    updateCellState(x, y + 1); //bottom-side
 
     //DIAGONALS
-    updateCellState(x + 1 ,y - 1); //top-left
-    updateCellState(x - 1 ,y - 1); //top-right
-    updateCellState(x - 1 ,y + 1); //bottom-left
-    updateCellState(x + 1 ,y + 1); //bottom-right
+    updateCellState(x + 1, y - 1); //top-left
+    updateCellState(x - 1, y - 1); //top-right
+    updateCellState(x - 1, y + 1); //bottom-left
+    updateCellState(x + 1, y + 1); //bottom-right
 }
 
-function updateLiveCellAndAllNeibourghs(x,y)
+function updateLiveCellAndAllNeibourghs(x, y)
 {
-    updateNeibourghs(x,y);
-    updateCellState(x,y);
+    updateNeibourghs(x, y);
+    updateCellState(x, y);
 }
 
 function nextGeneration()
 {
-    for (let cell in cells) {
-        if(cells[cell] == 1 ){
+    for (let cell in cells) 
+    {
+        if(cells[cell] == 1 )
+        {
             var cellName = cell.split('-');
             updateLiveCellAndAllNeibourghs(parseInt(cellName[0]), parseInt(cellName[1]));
         }
@@ -168,14 +195,9 @@ function randomCoordinate()
 
 function randomSpawn(power)
 {
-    for (var i=0; i <  numOfLines * power; i++) {
-        activateCell(randomCoordinate(),randomCoordinate());
+    for (var i = 0; i < numOfLines * power; i++) {
+        activateCell(randomCoordinate(), randomCoordinate());
     }
-}
-
-function getCellID(x,y)
-{
-    return x+'-'+y;
 }
 
 };
