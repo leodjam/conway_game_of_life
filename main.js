@@ -91,7 +91,7 @@ function getCellID(x, y)
 
 function getCellColor()
 {
-    return cellColors[Math.floor(Math.random() * 5)];
+    return cellColors[Math.floor(Math.random() * cellColors.length)];
 }
 
 function updateCellState(x, y)
